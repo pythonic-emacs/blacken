@@ -50,7 +50,7 @@ Return black process the exit code."
         (push "--multi-line" args)
         (push (number-to-string blackify-line-length) args))
       (push "-" args)
-      (apply 'call-process-region (point-min) (point-max) "black" nil output-buffer nil (reverse args)))))
+      (apply 'call-process-region (point-min) (point-max) "black" nil `(,output-buffer nil) nil (reverse args)))))
 
 ;;;###autoload
 (defun blackify-buffer (&optional display)
