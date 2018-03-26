@@ -1,9 +1,9 @@
-;;; blackify.el --- (automatically) format python buffers using black.
+;;; blacken.el --- (automatically) format python buffers using black (external code formatter).
 
 ;; Copyright (C) 2018 Artem Malyshev
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
-;; Homepage: https://github.com/proofit404/blackify
+;; Homepage: https://github.com/proofit404/blacken
 ;; Version: 0.0.1
 ;; Package-Requires: ()
 
@@ -22,52 +22,54 @@
 
 ;;; Commentary:
 ;;
-;; Blackify uses black to format a Python buffer.  It can be called
+;; Blacken uses black to format a Python buffer.  It can be called
 ;; explicitly on a certain buffer, but more conveniently, a minor-mode
-;; 'black-mode' is provided that turns on automatically running black
-;; on a buffer before saving.
+;; 'blacken-mode' is provided that turns on automatically running
+;; black on a buffer before saving.
 ;;
 ;; Installation:
 ;;
-;; Add blackify.el to your load-path.
+;; Add blacken.el to your load-path.
 ;;
-;; To automatically format all Python buffers before saving, add the function
-;; black-mode to python-mode-hook:
+;; To automatically format all Python buffers before saving, add the
+;; function blacken-mode to python-mode-hook:
 ;;
-;; (add-hook 'python-mode-hook 'black-mode)
+;; (add-hook 'python-mode-hook 'blacken-mode)
 ;;
 ;;; Code:
 
-(defvar blackify-line-length nil)
+(defvar blacken-executable "black")
 
-(defun blackify-call-bin (input-buffer output-buffer)
+(defvar blacken-line-length nil)
+
+(defun blacken-call-bin (input-buffer output-buffer)
   "Call process black on INPUT-BUFFER saving the output to OUTPUT-BUFFER.
 
 Return black process the exit code."
   (with-current-buffer input-buffer
     (let (args)
-      (when blackify-line-length
+      (when blacken-line-length
         (push "--multi-line" args)
-        (push (number-to-string blackify-line-length) args))
+        (push (number-to-string blacken-line-length) args))
       (push "-" args)
-      (apply 'call-process-region (point-min) (point-max) "black" nil `(,output-buffer nil) nil (reverse args)))))
+      (apply 'call-process-region (point-min) (point-max) blacken-executable nil `(,output-buffer nil) nil (reverse args)))))
 
 ;;;###autoload
-(defun blackify-buffer (&optional display)
-  "Try to blackify the current buffer.
+(defun blacken-buffer (&optional display)
+  "Try to blacken the current buffer.
 
 Show black output, if black exit abnormally and DISPLAY is t."
   (interactive (list t))
   (let* ((original-buffer (current-buffer))
          (original-point (point))
          (original-window-pos (window-start))
-         (tmpbuf (get-buffer-create "*blackify*")))
+         (tmpbuf (get-buffer-create "*blacken*")))
     ;; This buffer can be left after previous black invocation.  It
     ;; can contain error message of the previous run.
     (with-current-buffer tmpbuf
       (erase-buffer))
     (condition-case err
-        (if (not (zerop (blackify-call-bin original-buffer tmpbuf)))
+        (if (not (zerop (blacken-call-bin original-buffer tmpbuf)))
             (error "Black failed, see %s buffer for details" (buffer-name tmpbuf))
           (with-current-buffer tmpbuf
             (copy-to-buffer original-buffer (point-min) (point-max)))
@@ -79,13 +81,13 @@ Show black output, if black exit abnormally and DISPLAY is t."
                (pop-to-buffer tmpbuf))))))
 
 ;;;###autoload
-(define-minor-mode black-mode
+(define-minor-mode blacken-mode
   "Automatically run black before saving."
   :lighter " Black"
-  (if black-mode
-      (add-hook 'before-save-hook 'blackify-buffer nil t)
-    (remove-hook 'before-save-hook 'blackify-buffer t)))
+  (if blacken-mode
+      (add-hook 'before-save-hook 'blacken-buffer nil t)
+    (remove-hook 'before-save-hook 'blacken-buffer t)))
 
-(provide 'blackify)
+(provide 'blacken)
 
-;;; blackify.el ends here
+;;; blacken.el ends here
