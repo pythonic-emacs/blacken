@@ -5,7 +5,7 @@
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; Homepage: https://github.com/proofit404/blacken
 ;; Version: 0.0.1
-;; Package-Requires: ()
+;; Package-Requires: ((emacs "25.2"))
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published
@@ -42,17 +42,36 @@
 
 (defvar blacken-line-length nil)
 
-(defun blacken-call-bin (input-buffer output-buffer)
-  "Call process black on INPUT-BUFFER saving the output to OUTPUT-BUFFER.
+(defun blacken-call-bin (input-buffer output-buffer error-buffer)
+  "Call process black.
 
+Send INPUT-BUFFER content to the process stdin.  Saving the
+output to OUTPUT-BUFFER.  Saving process stderr to ERROR-BUFFER.
 Return black process the exit code."
   (with-current-buffer input-buffer
-    (let (args)
-      (when blacken-line-length
-        (push "--multi-line" args)
-        (push (number-to-string blacken-line-length) args))
-      (push "-" args)
-      (apply 'call-process-region (point-min) (point-max) blacken-executable nil `(,output-buffer nil) nil (reverse args)))))
+    (let ((process (make-process :name "blacken"
+                                 :command `(,blacken-executable ,@(blacken-call-args))
+                                 :buffer output-buffer
+                                 :stderr error-buffer
+                                 :noquery t
+                                 :sentinel (lambda (process event)))))
+      (set-process-query-on-exit-flag (get-buffer-process error-buffer) nil)
+      (set-process-sentinel (get-buffer-process error-buffer) (lambda (process event)))
+      (process-send-region process (point-min) (point-max))
+      (process-send-eof process)
+      (accept-process-output process nil nil t)
+      (while (process-live-p process)
+        (accept-process-output process nil nil t))
+      (process-exit-status process))))
+
+(defun blacken-call-args ()
+  "Build black process call arguments."
+  (let (args)
+    (when blacken-line-length
+      (push "--multi-line" args)
+      (push (number-to-string blacken-line-length) args))
+    (push "-" args)
+    (reverse args)))
 
 ;;;###autoload
 (defun blacken-buffer (&optional display)
@@ -63,22 +82,24 @@ Show black output, if black exit abnormally and DISPLAY is t."
   (let* ((original-buffer (current-buffer))
          (original-point (point))
          (original-window-pos (window-start))
-         (tmpbuf (get-buffer-create "*blacken*")))
+         (tmpbuf (get-buffer-create "*blacken*"))
+         (errbuf (get-buffer-create "*blacken-error*")))
     ;; This buffer can be left after previous black invocation.  It
     ;; can contain error message of the previous run.
-    (with-current-buffer tmpbuf
-      (erase-buffer))
+    (dolist (buf (list tmpbuf errbuf))
+      (with-current-buffer buf
+        (erase-buffer)))
     (condition-case err
-        (if (not (zerop (blacken-call-bin original-buffer tmpbuf)))
-            (error "Black failed, see %s buffer for details" (buffer-name tmpbuf))
+        (if (not (zerop (blacken-call-bin original-buffer tmpbuf errbuf)))
+            (error "Black failed, see %s buffer for details" (buffer-name errbuf))
           (with-current-buffer tmpbuf
             (copy-to-buffer original-buffer (point-min) (point-max)))
-          (kill-buffer tmpbuf)
+          (mapc 'kill-buffer (list tmpbuf errbuf))
           (goto-char original-point)
           (set-window-start (selected-window) original-window-pos))
       (error (message "%s" (error-message-string err))
              (when display
-               (pop-to-buffer tmpbuf))))))
+               (pop-to-buffer errbuf))))))
 
 ;;;###autoload
 (define-minor-mode blacken-mode
