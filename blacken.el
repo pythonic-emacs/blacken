@@ -1,4 +1,4 @@
-;;; blacken.el --- (automatically) format python buffers using black (external code formatter).
+;;; blacken.el --- Reformat python buffers using the "black" formatter
 
 ;; Copyright (C) 2018 Artem Malyshev
 
@@ -38,9 +38,18 @@
 ;;
 ;;; Code:
 
-(defvar blacken-executable "black")
 
-(defvar blacken-line-length nil)
+(defgroup blacken nil
+  "Reformat Python code with \"black\"."
+  :group 'python)
+
+(defcustom blacken-executable "black"
+  "Name of the executable to run."
+  :type 'string)
+
+(defvar blacken-line-length nil
+  "Line length to enforce."
+  :type 'number)
 
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
@@ -57,7 +66,9 @@ Return black process the exit code."
                                  :sentinel (lambda (process event)))))
       (set-process-query-on-exit-flag (get-buffer-process error-buffer) nil)
       (set-process-sentinel (get-buffer-process error-buffer) (lambda (process event)))
-      (process-send-region process (point-min) (point-max))
+      (save-restriction
+        (widen)
+        (process-send-region process (point-min) (point-max)))
       (process-send-eof process)
       (accept-process-output process nil nil t)
       (while (process-live-p process)
@@ -66,12 +77,10 @@ Return black process the exit code."
 
 (defun blacken-call-args ()
   "Build black process call arguments."
-  (let (args)
-    (when blacken-line-length
-      (push "--multi-line" args)
-      (push (number-to-string blacken-line-length) args))
-    (push "-" args)
-    (reverse args)))
+  (append
+   (when blacken-line-length
+     (list "--multi-line" (number-to-string blacken-line-length)))
+   '("-")))
 
 ;;;###autoload
 (defun blacken-buffer (&optional display)
