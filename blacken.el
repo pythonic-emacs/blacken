@@ -47,7 +47,7 @@
   "Name of the executable to run."
   :type 'string)
 
-(defvar blacken-line-length nil
+(defcustom blacken-line-length nil
   "Line length to enforce."
   :type 'number)
 
