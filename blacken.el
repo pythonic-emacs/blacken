@@ -49,7 +49,8 @@
 
 (defcustom blacken-line-length nil
   "Line length to enforce."
-  :type 'number)
+  :type 'number
+  :safe 'numberp)
 
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
@@ -79,7 +80,7 @@ Return black process the exit code."
   "Build black process call arguments."
   (append
    (when blacken-line-length
-     (list "--multi-line" (number-to-string blacken-line-length)))
+     (list "--line-length" (number-to-string blacken-line-length)))
    '("-")))
 
 ;;;###autoload
