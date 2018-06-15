@@ -102,8 +102,9 @@ Show black output, if black exit abnormally and DISPLAY is t."
     (condition-case err
         (if (not (zerop (blacken-call-bin original-buffer tmpbuf errbuf)))
             (error "Black failed, see %s buffer for details" (buffer-name errbuf))
-          (with-current-buffer tmpbuf
-            (copy-to-buffer original-buffer (point-min) (point-max)))
+          (unless (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0)
+            (with-current-buffer tmpbuf
+              (copy-to-buffer original-buffer (point-min) (point-max))))
           (mapc 'kill-buffer (list tmpbuf errbuf))
           (goto-char original-point)
           (set-window-start (selected-window) original-window-pos))
