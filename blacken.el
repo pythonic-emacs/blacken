@@ -52,6 +52,16 @@
   :type 'number
   :safe 'numberp)
 
+(defcustom blacken-allow-py36 nil
+  "Allow using Python 3.6-only syntax on all input files."
+  :type 'boolean
+  :safe 'booleanp)
+
+(defcustom blacken-skip-string-normalization nil
+  "Don't normalize string quotes or prefixes."
+  :type 'boolean
+  :safe 'booleanp)
+
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
 
@@ -81,6 +91,10 @@ Return black process the exit code."
   (append
    (when blacken-line-length
      (list "--line-length" (number-to-string blacken-line-length)))
+   (when blacken-allow-py36
+     (list "--py36"))
+   (when blacken-skip-string-normalization
+     (list "--skip-string-normalization"))
    '("-")))
 
 ;;;###autoload
