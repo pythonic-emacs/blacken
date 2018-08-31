@@ -62,6 +62,11 @@
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom blacken-fast-unsafe nil
+  "Skips temporary sanity checks."
+  :type 'boolean
+  :safe 'booleanp)
+
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
 
@@ -93,6 +98,8 @@ Return black process the exit code."
      (list "--line-length" (number-to-string blacken-line-length)))
    (when blacken-allow-py36
      (list "--py36"))
+   (when blacken-fast-unsafe
+     (list "--fast")
    (when blacken-skip-string-normalization
      (list "--skip-string-normalization"))
    '("-")))
