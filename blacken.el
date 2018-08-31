@@ -99,7 +99,7 @@ Return black process the exit code."
    (when blacken-allow-py36
      (list "--py36"))
    (when blacken-fast-unsafe
-     (list "--fast")
+     (list "--fast"))
    (when blacken-skip-string-normalization
      (list "--skip-string-normalization"))
    '("-")))
