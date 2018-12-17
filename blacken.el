@@ -36,6 +36,12 @@
 ;;
 ;; (add-hook 'python-mode-hook 'blacken-mode)
 ;;
+;; To automatically format before saving only Python buffers
+;; associated with files in certain directories create an empty
+;; .blaken file in those directories and add the following hook:
+
+;; (add-hook 'python-mode-hook 'blacken-on-save-if-opted-in)
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -74,6 +80,11 @@ If `fill', the `fill-column' variable value is used."
   "Skips temporary sanity checks."
   :type 'boolean
   :safe 'booleanp)
+
+(defcustom blacken-opt-in-file-name ".blacken"
+  "Name of marker file that inidicates that directory's subtree wants to use blacken."
+  :type 'string)
+
 
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
@@ -151,6 +162,27 @@ Show black output, if black exit abnormally and DISPLAY is t."
   (if blacken-mode
       (add-hook 'before-save-hook 'blacken-buffer nil t)
     (remove-hook 'before-save-hook 'blacken-buffer t)))
+
+
+(defun blacken-opted-in (path)
+  "Determine if file at PATH should be formatted on save."
+  (let* ((parent-dir (blacken-get-parent-dir path))
+         (result     (file-exists-p (concat parent-dir blacken-opt-in-file-name))) )
+    (if (equal parent-dir path) nil
+      (if result result
+        (blacken-opted-in parent-dir)))))
+
+(defun blacken-get-parent-dir (path)
+  "Return parent directory of file or directory specied by PATH."
+  (file-name-directory (directory-file-name path)))
+
+;;;###autoload
+(defun blacken-on-save-if-opted-in ()
+  "Conditionally add 'before-save-hook to run black."
+    (when (blacken-opted-in (buffer-file-name(current-buffer)))
+      (message "File will be formatted on save")
+      (add-hook 'before-save-hook 'blacken-buffer nil t)))
+
 
 (provide 'blacken)
 
