@@ -166,11 +166,12 @@ Show black output, if black exit abnormally and DISPLAY is t."
 
 (defun blacken-opted-in (path)
   "Determine if file at PATH should be formatted on save."
-  (let* ((parent-dir (blacken-get-parent-dir path))
-         (result     (file-exists-p (concat parent-dir blacken-opt-in-file-name))) )
-    (if (equal parent-dir path) nil
-      (if result result
-        (blacken-opted-in parent-dir)))))
+  (when path
+    (let* ((parent-dir (blacken-get-parent-dir path))
+           (result     (file-exists-p (concat parent-dir blacken-opt-in-file-name))) )
+      (if (equal parent-dir path) nil
+        (if result result
+          (blacken-opted-in parent-dir))))))
 
 (defun blacken-get-parent-dir (path)
   "Return parent directory of file or directory specied by PATH."
