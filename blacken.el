@@ -1,6 +1,6 @@
 ;;; blacken.el --- Reformat python buffers using the "black" formatter
 
-;; Copyright (C) 2018 Artem Malyshev
+;; Copyright (C) 2018-2019 Artem Malyshev
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; Homepage: https://github.com/proofit404/blacken
@@ -39,7 +39,6 @@
 ;;; Code:
 
 (require 'cl-lib)
-
 
 (defgroup blacken nil
   "Reformat Python code with \"black\"."
