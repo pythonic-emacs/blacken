@@ -144,6 +144,26 @@ Show black output, if black exit abnormally and DISPLAY is t."
                (pop-to-buffer errbuf))))))
 
 ;;;###autoload
+(defun blacken-region (beg end)
+  "Try to blacken the current region (between BEG and END)."
+  (interactive (if (use-region-p)
+                   (list (region-beginning) (region-end))
+                 (list nil nil)))
+  (let* ((origbuf (current-buffer))
+         (origbeg beg)
+         (origend end)
+         (regionbuf (get-buffer-create "*blacken-region*"))
+         (content (buffer-substring-no-properties beg end)))
+    (with-current-buffer regionbuf
+      (erase-buffer)
+      (insert content)
+      (blacken-buffer)
+      (with-current-buffer origbuf
+        (delete-region origbeg origend)
+        (insert-buffer-substring regionbuf)))
+    (kill-buffer regionbuf)))
+
+;;;###autoload
 (define-minor-mode blacken-mode
   "Automatically run black before saving."
   :lighter " Black"
