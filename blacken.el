@@ -121,8 +121,6 @@ Return black process the exit code."
 Show black output, if black exit abnormally and DISPLAY is t."
   (interactive (list t))
   (let* ((original-buffer (current-buffer))
-         (original-point (point))
-         (original-window-pos (window-start))
          (tmpbuf (get-buffer-create "*blacken*"))
          (errbuf (get-buffer-create "*blacken-error*")))
     ;; This buffer can be left after previous black invocation.  It
@@ -134,10 +132,7 @@ Show black output, if black exit abnormally and DISPLAY is t."
         (if (not (zerop (blacken-call-bin original-buffer tmpbuf errbuf)))
             (error "Black failed, see %s buffer for details" (buffer-name errbuf))
           (unless (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0)
-            (with-current-buffer tmpbuf
-              (copy-to-buffer original-buffer (point-min) (point-max)))
-            (goto-char original-point)
-            (set-window-start (selected-window) original-window-pos))
+            (with-current-buffer original-buffer (replace-buffer-contents tmpbuf)))
           (mapc 'kill-buffer (list tmpbuf errbuf)))
       (error (message "%s" (error-message-string err))
              (when display
