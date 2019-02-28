@@ -150,9 +150,18 @@ Show black output, if black exit abnormally and DISPLAY is t."
                    (list (region-beginning) (region-end))
                  (list nil nil)))
   (let* ((content (buffer-substring-no-properties beg end))
+         (indentation (with-temp-buffer
+                         (insert content)
+                         (goto-char (point-min))
+                         (back-to-indentation)
+                         (- (point) 1)))
          (blackened (with-temp-buffer
                       (insert content)
+                      (dotimes (i indentation)
+                        (indent-rigidly-left (point-min) (point-max)))
                       (blacken-buffer)
+                      (dotimes (i indentation)
+                        (indent-rigidly-right (point-min) (point-max)))
                       (buffer-string))))
     (with-current-buffer (current-buffer)
       (delete-region beg end)
