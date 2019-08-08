@@ -113,7 +113,7 @@ Return black process the exit code."
    (when blacken-skip-string-normalization
      (list "--skip-string-normalization"))
    (when (string-match "\.pyi$" (buffer-file-name (current-buffer)))
-     (list "--pyi"))   
+     (list "--pyi"))
    '("-")))
 
 ;;;###autoload
@@ -145,13 +145,26 @@ Show black output, if black exit abnormally and DISPLAY is t."
              (when display
                (pop-to-buffer errbuf))))))
 
+(defun regex-in-file (regex file)
+  "Reads a file and returns a list of lines in that file"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (re-search-forward regex nil t 1)))
+
+(defun blacken-buffer-if-project-is-blackened (&optional display)
+  "Blacken buffer IF the project has a pyproject.toml with [tool.black] in it."
+  (let ((parent (locate-dominating-file default-directory "pyproject.toml")))
+    (when (and parent
+               (regex-in-file "^\\[tool.black\\]$" (concat parent "pyproject.toml")))
+        (blacken-buffer display))))
+
 ;;;###autoload
 (define-minor-mode blacken-mode
   "Automatically run black before saving."
   :lighter " Black"
   (if blacken-mode
-      (add-hook 'before-save-hook 'blacken-buffer nil t)
-    (remove-hook 'before-save-hook 'blacken-buffer t)))
+      (add-hook 'before-save-hook 'blacken-buffer-if-project-is-blackened nil t)
+    (remove-hook 'before-save-hook 'blacken-buffer-if-project-is-blackened t)))
 
 (provide 'blacken)
 
