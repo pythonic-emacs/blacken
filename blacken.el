@@ -74,6 +74,11 @@ If `fill', the `fill-column' variable value is used."
   :type 'boolean
   :safe 'booleanp)
 
+(defcustom blacken-only-if-project-is-blackened nil
+  "Only blacken if project has a pyproject.toml with a [tool.black] section."
+  :type 'boolean
+  :safe 'booleanp)
+
 (defun blacken-call-bin (input-buffer output-buffer error-buffer)
   "Call process black.
 
@@ -116,6 +121,18 @@ Return black process the exit code."
      (list "--pyi"))
    '("-")))
 
+(defun blacken-regex-in-file (regex file)
+  "Reads a file and returns a list of lines in that file"
+  (with-temp-buffer
+    (insert-file-contents file)
+    (re-search-forward regex nil t 1)))
+
+(defun blacken-project-is-blackened (&optional display)
+  "Whether the project has a pyproject.toml with [tool.black] in it."
+  (let ((parent (locate-dominating-file default-directory "pyproject.toml")))
+    (and parent
+         (blacken-regex-in-file "^\\[tool.black\\]$" (concat parent "pyproject.toml")))))
+
 ;;;###autoload
 (defun blacken-buffer (&optional display)
   "Try to blacken the current buffer.
@@ -145,26 +162,15 @@ Show black output, if black exit abnormally and DISPLAY is t."
              (when display
                (pop-to-buffer errbuf))))))
 
-(defun regex-in-file (regex file)
-  "Reads a file and returns a list of lines in that file"
-  (with-temp-buffer
-    (insert-file-contents file)
-    (re-search-forward regex nil t 1)))
-
-(defun blacken-buffer-if-project-is-blackened (&optional display)
-  "Blacken buffer IF the project has a pyproject.toml with [tool.black] in it."
-  (let ((parent (locate-dominating-file default-directory "pyproject.toml")))
-    (when (and parent
-               (regex-in-file "^\\[tool.black\\]$" (concat parent "pyproject.toml")))
-        (blacken-buffer display))))
-
 ;;;###autoload
 (define-minor-mode blacken-mode
   "Automatically run black before saving."
   :lighter " Black"
   (if blacken-mode
-      (add-hook 'before-save-hook 'blacken-buffer-if-project-is-blackened nil t)
-    (remove-hook 'before-save-hook 'blacken-buffer-if-project-is-blackened t)))
+      (when (or (not blacken-only-if-project-is-blackened)
+                (blacken-project-is-blackened))
+        (add-hook 'before-save-hook 'blacken-buffer nil t))
+    (remove-hook 'before-save-hook 'blacken-buffer t)))
 
 (provide 'blacken)
 
