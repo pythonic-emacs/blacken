@@ -121,17 +121,12 @@ Return black process the exit code."
      (list "--pyi"))
    '("-")))
 
-(defun blacken-regex-in-file (regex file)
-  "Reads a file and returns a list of lines in that file"
-  (with-temp-buffer
-    (insert-file-contents file)
-    (re-search-forward regex nil t 1)))
-
 (defun blacken-project-is-blackened (&optional display)
   "Whether the project has a pyproject.toml with [tool.black] in it."
-  (let ((parent (locate-dominating-file default-directory "pyproject.toml")))
-    (and parent
-         (blacken-regex-in-file "^\\[tool.black\\]$" (concat parent "pyproject.toml")))))
+  (when-let ((parent (locate-dominating-file default-directory "pyproject.toml")))
+    (with-temp-buffer
+      (insert-file-contents (concat parent "pyproject.toml"))
+      (re-search-forward "^\\[tool.black\\]$" nil t 1))))
 
 ;;;###autoload
 (defun blacken-buffer (&optional display)
