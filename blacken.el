@@ -156,6 +156,8 @@ Show black output, if black exit abnormally and DISPLAY is t."
           (mapc 'kill-buffer (list tmpbuf errbuf)))
       (error (message "%s" (error-message-string err))
              (when display
+               (with-current-buffer errbuf
+                 (setq-local scroll-conservatively 0))
                (pop-to-buffer errbuf))))))
 
 ;;;###autoload
