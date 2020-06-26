@@ -118,7 +118,7 @@ Return black process the exit code."
    (when blacken-skip-string-normalization
      (list "--skip-string-normalization"))
    (when (and (buffer-file-name (current-buffer))
-              (string-match "\.pyi$" (buffer-file-name (current-buffer))))
+              (string-match "\\.pyi\\'" (buffer-file-name (current-buffer))))
      (list "--pyi"))
    '("-")))
 
