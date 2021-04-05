@@ -112,7 +112,7 @@ Return black process the exit code."
                                ('fill fill-column)
                                (t blacken-line-length)))))
    (when blacken-allow-py36
-     (list "--py36"))
+     (list "--target-version" "py36"))
    (when blacken-fast-unsafe
      (list "--fast"))
    (when blacken-skip-string-normalization
