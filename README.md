@@ -19,3 +19,12 @@ The following options change the behavior of black when reformatting buffers.
 - `blacken-skip-string-normalization` Don't normalize string quotes or prefixes.
 - `blacken-fast-unsafe` Skips temporary sanity checks.
 - `blacken-line-length` Max line length enforced by blacken.
+
+## license
+
+`blacken.el` is free software; you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation; either version 3, or (at your option) any later
+version.
+
+SPDX-License-Identifier: GPL-3.0-or-later

@@ -6,6 +6,7 @@
 ;; Homepage: https://github.com/proofit404/blacken
 ;; Version: 0.0.1
 ;; Package-Requires: ((emacs "25.2"))
+;; SPDX-License-Identifier: GPL-3.0-or-later
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published
