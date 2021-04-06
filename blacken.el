@@ -165,9 +165,15 @@ Show black output, if black exit abnormally and DISPLAY is t."
   "Automatically run black before saving."
   :lighter " Black"
   (if blacken-mode
-      (when (or (not blacken-only-if-project-is-blackened)
-                (blacken-project-is-blackened))
-        (add-hook 'before-save-hook 'blacken-buffer nil t))
+      (progn
+        ;; add before save hook to automatically run black
+        (when (or (not blacken-only-if-project-is-blackened)
+                  (blacken-project-is-blackened))
+          (add-hook 'before-save-hook 'blacken-buffer nil t))
+        ;; show overlong lines correctly when using whitespace mode
+        (if blacken-line-length
+            (setq whitespace-line-column blacken-line-length)
+          (setq whitespace-line-column 88)))
     (remove-hook 'before-save-hook 'blacken-buffer t)))
 
 (provide 'blacken)
