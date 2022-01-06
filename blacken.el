@@ -60,9 +60,9 @@ If `fill', the `fill-column' variable value is used."
            (integer :tag "Line Length"))
   :safe 'integerp)
 
-(defcustom blacken-allow-py36 nil
-  "Allow using Python 3.6-only syntax on all input files."
-  :type 'boolean
+(defcustom blacken-target-version nil
+  "Set the target python version."
+  :type 'string
   :safe 'booleanp)
 
 (defcustom blacken-skip-string-normalization nil
@@ -112,8 +112,8 @@ Return black process the exit code."
            (number-to-string (cl-case blacken-line-length
                                ('fill fill-column)
                                (t blacken-line-length)))))
-   (when blacken-allow-py36
-     (list "--target-version" "py36"))
+   (when blacken-target-version
+     (list "--target-version" blacken-target-version))
    (when blacken-fast-unsafe
      (list "--fast"))
    (when blacken-skip-string-normalization
