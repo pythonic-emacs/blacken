@@ -4,7 +4,7 @@
 
 ;; Author: Artem Malyshev <proofit404@gmail.com>
 ;; Homepage: https://github.com/proofit404/blacken
-;; Version: 0.0.1
+;; Version: 0.2.0
 ;; Package-Requires: ((emacs "25.2"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 
@@ -64,6 +64,11 @@ If `fill', the `fill-column' variable value is used."
   "Allow using Python 3.6-only syntax on all input files."
   :type 'boolean
   :safe 'booleanp)
+(make-obsolete-variable 'blacken-allow-py36 'blacken-target-version "0.2.0")
+
+(defcustom blacken-target-version nil
+  "Set the target python version."
+  :type 'string)
 
 (defcustom blacken-skip-string-normalization nil
   "Don't normalize string quotes or prefixes."
@@ -112,8 +117,10 @@ Return black process the exit code."
            (number-to-string (cl-case blacken-line-length
                                ('fill fill-column)
                                (t blacken-line-length)))))
-   (when blacken-allow-py36
-     (list "--target-version" "py36"))
+   (if blacken-allow-py36
+       (list "--target-version" "py36")
+     (when blacken-target-version
+       (list "--target-version" blacken-target-version)))
    (when blacken-fast-unsafe
      (list "--fast"))
    (when blacken-skip-string-normalization
