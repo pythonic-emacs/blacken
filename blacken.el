@@ -144,8 +144,10 @@ Return black process the exit code."
 Show black output, if black exit abnormally and DISPLAY is t."
   (interactive (list t))
   (let* ((original-buffer (current-buffer))
-         (original-point (point))
-         (original-window-pos (window-start))
+         (original-window-states (mapcar
+                                  (lambda (w)
+                                    (list w (window-point w) (window-start w)))
+                                  (get-buffer-window-list)))
          (tmpbuf (get-buffer-create "*blacken*"))
          (errbuf (get-buffer-create "*blacken-error*")))
     ;; This buffer can be left after previous black invocation.  It
@@ -159,8 +161,9 @@ Show black output, if black exit abnormally and DISPLAY is t."
           (unless (eq (compare-buffer-substrings tmpbuf nil nil original-buffer nil nil) 0)
             (with-current-buffer tmpbuf
               (copy-to-buffer original-buffer (point-min) (point-max)))
-            (goto-char original-point)
-            (set-window-start (selected-window) original-window-pos))
+            (dolist (win-stt original-window-states)
+              (set-window-point (car win-stt) (nth 1 win-stt))
+              (set-window-start (car win-stt) (nth 2 win-stt))))
           (mapc 'kill-buffer (list tmpbuf errbuf)))
       (error (message "%s" (error-message-string err))
              (when display
