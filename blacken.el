@@ -132,7 +132,7 @@ Return black process the exit code."
 
 (defun blacken-project-is-blackened (&optional display)
   "Whether the project has a pyproject.toml with [tool.black] in it."
-  (when-let ((parent (locate-dominating-file default-directory "pyproject.toml")))
+  (when-let (parent (locate-dominating-file default-directory "pyproject.toml"))
     (with-temp-buffer
       (insert-file-contents (concat parent "pyproject.toml"))
       (re-search-forward "^\\[tool.black\\]$" nil t 1))))
