@@ -39,8 +39,6 @@
 ;;
 ;;; Code:
 
-(require 'cl-lib)
-
 (defgroup blacken nil
   "Reformat Python code with \"black\"."
   :group 'python)
@@ -114,9 +112,9 @@ Return black process the exit code."
   (append
    (when blacken-line-length
      (list "--line-length"
-           (number-to-string (cl-case blacken-line-length
-                               ('fill fill-column)
-                               (t blacken-line-length)))))
+           (number-to-string (if (eq blacken-line-length 'fill)
+                                 fill-column
+                               blacken-line-length))))
    (if blacken-allow-py36
        (list "--target-version" "py36")
      (when blacken-target-version
