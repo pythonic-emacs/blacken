@@ -1,3 +1,7 @@
+[![MELPA](https://melpa.org/packages/blacken-badge.svg)](https://melpa.org/#/blacken)
+[![MELPA Stable](https://stable.melpa.org/packages/blacken-badge.svg)](https://stable.melpa.org/#/blacken)
+[![CI](https://github.com/pythonic-emacs/blacken/actions/workflows/test.yml/badge.svg)](https://github.com/pythonic-emacs/blacken/actions/workflows/test.yml)
+
 # Blacken
 
 Use the python `black` package to reformat your python buffers.
