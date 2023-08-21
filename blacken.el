@@ -7,6 +7,7 @@
 ;; Version: 0.2.0
 ;; Package-Requires: ((emacs "25.2"))
 ;; SPDX-License-Identifier: GPL-3.0-or-later
+;; Keywords: convenience blacken
 
 ;; This file is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published
