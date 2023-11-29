@@ -95,6 +95,7 @@ Return black process the exit code."
                                  :command `(,blacken-executable ,@(blacken-call-args))
                                  :buffer output-buffer
                                  :stderr error-buffer
+                                 :connection-type 'pipe
                                  :noquery t
                                  :sentinel (lambda (process event)))))
       (set-process-query-on-exit-flag (get-buffer-process error-buffer) nil)
