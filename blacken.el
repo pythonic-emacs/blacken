@@ -48,6 +48,10 @@
   "Name of the executable to run."
   :type 'string)
 
+(defcustom blacken-executable-list '(blacken-executable)
+  "Command (with extra arguments) to invoke black"
+  :type '(repeat string))
+
 (defcustom blacken-line-length nil
   "Line length to enforce.
 
@@ -92,7 +96,7 @@ output to OUTPUT-BUFFER.  Saving process stderr to ERROR-BUFFER.
 Return black process the exit code."
   (with-current-buffer input-buffer
     (let ((process (make-process :name "blacken"
-                                 :command `(,blacken-executable ,@(blacken-call-args))
+                                 :command `(,@blacken-executable-list ,@(blacken-call-args))
                                  :buffer output-buffer
                                  :stderr error-buffer
                                  :connection-type 'pipe
