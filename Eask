@@ -1,3 +1,5 @@
+;; -*- mode: eask; lexical-binding: t -*-
+
 (package "blacken"
          "0.2.0"
          "Reformat python buffers using the \"black\" formatter")
